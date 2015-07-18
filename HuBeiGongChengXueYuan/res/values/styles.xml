@@ -17,17 +17,14 @@
         <item name="android:windowNoTitle">true</item>
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
-	<style
-        name="SpecialText"
-        parent="@style/TextAppearance.AppCompat">
+	<style name="SpecialText" parent="@style/AppBaseTheme">
         <item name="android:textSize">20sp</item>
         <item name="android:gravity">center</item>
         <item name="android:padding">10dp</item>
     </style>
     
      <style
-        name="ButtonText"
-        parent="@style/TextAppearance.AppCompat">
+        name="ButtonText" parent="@style/AppBaseTheme">
         <item name="android:textSize">13sp</item>
         <item name="android:gravity">center</item>
         <item name="android:padding">1dp</item>
