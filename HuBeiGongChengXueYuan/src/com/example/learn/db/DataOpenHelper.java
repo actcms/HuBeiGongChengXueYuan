@@ -20,7 +20,7 @@ private static final String GradeTest="create table GradeTest(" + "id integer pr
 "end text," + "score text)";
 
 private static final String MyClass="create table MyClass(" + "id integer primary key autoincrement," + "className text,"+
-"teacherName text," + "classPlace text," + "classWeek text," + "classNum integer)";
+"teatherName text," + "classPlace text," + "classWeek text," + "classNum integer,"+"matchWeek text)";
 
 public DataOpenHelper(Context context, String name, CursorFactory factory,
 			int version) {
@@ -34,6 +34,7 @@ public DataOpenHelper(Context context, String name, CursorFactory factory,
 		db.execSQL(News);
 		db.execSQL(AllClass);
 		db.execSQL(MyClass);
+		db.execSQL(GradeTest);
 	}
 
 	@Override

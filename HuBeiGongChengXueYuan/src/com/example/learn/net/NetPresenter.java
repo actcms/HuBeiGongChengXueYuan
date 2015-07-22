@@ -34,7 +34,7 @@ public class NetPresenter {
 	// cookie
 	public static String JSESSIONID;
 	// 验证码
-	Bitmap bitmap;
+	private Bitmap bitmap;
 	// 获取cookie
 	String url0 = "http://jwgl.hbeu.cn:8080/hbgcxy/";
 	// 获取验证码
@@ -56,88 +56,93 @@ public class NetPresenter {
 
 	private NetPresenter() {
 		httpUtil = new HttpUtil();
+		analysis=new Analysis();
 	}
 
 	public static NetPresenter getInstence() {
-		if (netPresenter != null) {
+		if (netPresenter == null) {
 			netPresenter = new NetPresenter();
 		}
 		return netPresenter;
 
 	}
+	private int cookieNub=0;
+	public int getCookie(){
+		HttpGet get = new HttpGet(url0);
+		List<Cookie> cookie = null;
+		HttpClient httpclient = new DefaultHttpClient();
+		HttpResponse httpresponse = null;
+		try {
+			httpresponse = httpclient.execute(get);
 
-	// 获取cookie
-	public void getCookie() {
-
-		new HttpUtil().httpGet(url0, new HttpCallbackListener() {
-
-			@Override
-			public void onFinish(HttpClient httpClient,
-					InputStream inputStream, String response) {
-				List<Cookie> cookie = ((AbstractHttpClient) httpClient)
-						.getCookieStore().getCookies();
-				JSESSIONID = cookie.get(0).getValue();
-			}
-
-			public void onError(Exception e) {
-				Log.e("NetPresenter", e.toString());
-			}
-		});
-
+		
+		if (httpresponse.getStatusLine().getStatusCode() == 200) {
+			// <strong>获取</strong>返回的cookie
+			cookie = ((AbstractHttpClient) httpclient).getCookieStore()
+					.getCookies();
+			JSESSIONID = cookie.get(0).getValue();
+			cookieNub=1;
+		} 
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+		}
+		return cookieNub;
 	}
 
 	// 获取验证码
 	public Bitmap getCheckCodePhoto() {
-		new HttpUtil().httpGet(url1, new HttpCallbackListener() {
+		Log.i("NetPresenter", "getCheckCodePhoto");
+		HttpGet get = new HttpGet(url1);
+		HttpClient httpclient = new DefaultHttpClient();
+		HttpResponse httpresponse = null;
 
-			@Override
-			public void onFinish(HttpClient httpClient,
-					InputStream inputStream, String response) {
-				bitmap = BitmapFactory.decodeStream(inputStream);
-			}
-
-			public void onError(Exception e) {
-				Log.e("NetPresenter", e.toString());
-				bitmap=null;
-			}
-		});
+		try {
+			get.setHeader("cookie", "JSESSIONID=" + JSESSIONID);
+			httpresponse = httpclient.execute(get);
+		if (httpresponse.getStatusLine().getStatusCode() == 200) {
+			Log.i("NetPresenter", "200");
+			InputStream inputread = httpresponse.getEntity().getContent();
+			bitmap = BitmapFactory.decodeStream(inputread);
+		} 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return bitmap;
 
 	}
-	private int logInNub=0;
+
+	private int logInNub = 0;
+
 	// 带cookie和用户名密码和验证码进行验证
-	public int logIn(String user,String password) {
+	public int logIn(String user, String password,String checkCode) {
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("PASSWORD", password));
-		params.add(new BasicNameValuePair("RANDOMCODE", ""));
+		params.add(new BasicNameValuePair("RANDOMCODE",checkCode));
 		params.add(new BasicNameValuePair("USERNAME", user));
 		new HttpUtil().httpPost(url2, JSESSIONID, params,
 				new HttpCallbackListener() {
-					public void onFinish(HttpClient httpClient,
-							InputStream inputStream, String response) {
-						logInNub=1;
-						
-						testCookie2();
-						
-						Log.i("get1", "success");
+					public void onFinish(String response) {
+						logInNub = 1;
+						getPrepare();
+						Log.i("logIn", "success");
 					}
 
 					@Override
 					public void onError(Exception e) {
 						Log.e("NetPresenter", e.toString());
-						logInNub=0;
+						logInNub = 0;
 					}
 				});
 		return logInNub;
 	}
 
 	/**
-	 *  进入成绩查询预备页面，不进此页面直接查成绩会报错
+	 * 进入成绩查询预备页面，不进此页面直接查成绩会报错
 	 */
-	public void testCookie2() {
-		new HttpUtil().httpGet(url3, JSESSIONID, new HttpCallbackListener() {
-			public void onFinish(HttpClient httpClient,
-					InputStream inputStream, String response) {
+	public void getPrepare() {
+		 HttpUtil.httpGet(url3, JSESSIONID, new HttpCallbackListener() {
+			public void onFinish(String response) {
 			}
 
 			public void onError(Exception e) {
@@ -145,9 +150,12 @@ public class NetPresenter {
 		});
 
 	}
-	private int scoreNub=0;
+
+	private int scoreNub = 0;
+
 	// 进入成绩查询界面，返回页面html文件
 	public int getScore() {
+		Log.i("NetPresenter", "getScore");
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("kcmc", null));
 		params.add(new BasicNameValuePair("kcxz", null));
@@ -156,75 +164,75 @@ public class NetPresenter {
 		params.add(new BasicNameValuePair("xsfs", "qbcj"));
 		new HttpUtil().httpPost(url4, JSESSIONID, params,
 				new HttpCallbackListener() {
-					public void onFinish(HttpClient httpClient,
-							InputStream inputStream, String response) {
-						scoreNub=1;
+					public void onFinish(String response) {
+						scoreNub = 1;
 						analysis.analysisScore(response);
 					}
+
 					public void onError(Exception e) {
-						scoreNub=0;
-						Log.e("", e.toString());
+						scoreNub = 0;
+						Log.e("NetPresenter", e.toString());
 					}
 				});
 		return scoreNub;
 	}
 
-	private int newsNub=0;
+	private int newsNub = 0;
+
 	// 登入校园新闻网，并爬去数据
 	public int getNews() {
-		new HttpUtil().httpGet(url5, new HttpCallbackListener() {
+		HttpUtil.httpGet(url5, new HttpCallbackListener() {
 
 			@Override
-			public void onFinish(HttpClient httpClient,
-					InputStream inputStream, String response) {
-				newsNub=1;
+			public void onFinish(String response) {
+				newsNub = 1;
 				analysis.analysisNews(response);
 			}
 
 			public void onError(Exception e) {
 				// TODO Auto-generated method stub
-				newsNub=0;
+				newsNub = 0;
 
 			}
 		});
 		return newsNub;
 	}
 
-	private int classNub=0;
-	
+	private int classNub = 0;
+
 	// 获得课程表的html
 	public int getClass(String a) {
-		new HttpUtil().httpGet(url6 + a, JSESSIONID,
+		HttpUtil.httpGet(url6 + a, JSESSIONID,
 				new HttpCallbackListener() {
-					public void onFinish(HttpClient httpClient,
-							InputStream inputStream, String response) {
-						classNub=1;
+					public void onFinish(String response) {
+						classNub = 1;
 						analysis.analysisMyClass(response);
 					}
 
 					@Override
 					public void onError(Exception e) {
-						classNub=0;
+						classNub = 0;
 					}
 				});
 		return classNub;
 	}
-	private int allClassNub=0;
+
+	private int allClassNub = 0;
+
 	// 获得全部成绩的的html
 	public int getAllClass() {
-		new HttpUtil().httpGet(url7, JSESSIONID, new HttpCallbackListener() {
+		HttpUtil.httpGet(url7, JSESSIONID, new HttpCallbackListener() {
 
 			@Override
-			public void onFinish(HttpClient httpClient,
-					InputStream inputStream, String response) {
-				allClassNub=1;
+			public void onFinish(String response) {
+				allClassNub = 1;
 				analysis.analyseAllClass(response);
 
 			}
 
 			@Override
 			public void onError(Exception e) {
-				allClassNub=0;
+				allClassNub = 0;
 				// TODO Auto-generated method stub
 
 			}
@@ -232,22 +240,19 @@ public class NetPresenter {
 		return allClassNub;
 	}
 
-	
-	private int testNub=0;
+	private int testNub = 0;
+
 	// 获得等级考试的的的html
 	public int getTest() {
-		new HttpUtil().httpGet(url8, JSESSIONID, new HttpCallbackListener() {
-
-			@Override
-			public void onFinish(HttpClient httpClient,
-					InputStream inputStream, String response) {
-				testNub=1;
+		HttpUtil.httpGet(url8, JSESSIONID, new HttpCallbackListener() {
+			public void onFinish(String response) {
+				testNub = 1;
 				analysis.analysisGradeTest(response);
 			}
 
 			@Override
 			public void onError(Exception e) {
-				testNub=0;
+				testNub = 0;
 			}
 		});
 		return testNub;

@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.example.learn.db.UserOpenHelper;
 
@@ -17,12 +18,14 @@ public class UserDB {
 	private SQLiteDatabase db;
 
 	private UserDB(Context context) {
+		Log.i("UserDB", "UserDB");
 		UserOpenHelper userOpenHelper = new UserOpenHelper(context, DBName,
 				null, Verson);
 		db = userOpenHelper.getWritableDatabase();
 	}
 
 	public synchronized static UserDB getInstance(Context context) {
+		Log.i("UserDB", "getInstance");
 		if (userDB == null) {
 			userDB = new UserDB(context);
 		}
@@ -39,8 +42,10 @@ public class UserDB {
 	}
 
 	public void saveUserNub(String id, String password) {
+		Log.i("UserDB", "saveUserNub" + id + password);
 		if (id != null && password != null) {
 			if ("".equals(id) != true && "".equals(password) != true) {
+				Log.i("UserDB", id + password);
 				ContentValues contentValues = new ContentValues();
 				contentValues.put("studentID", id);
 				contentValues.put("password", password);
@@ -77,6 +82,20 @@ public class UserDB {
 			}
 		}
 		return list;
+	}
+
+	public List loadUser() {
+		List list = new ArrayList<String>();
+		Cursor cursor = db.query("UserNumber", null, null, null, null, null,
+				null);
+		if (cursor.moveToFirst()) {
+			String studentID = cursor.getString(cursor
+					.getColumnIndex("studentID"));
+			list.add(studentID);
+			list.add(cursor.getString(cursor.getColumnIndex("password")));
+		}
+		return list;
+
 	}
 
 }

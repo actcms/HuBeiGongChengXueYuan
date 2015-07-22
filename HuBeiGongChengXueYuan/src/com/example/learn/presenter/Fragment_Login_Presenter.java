@@ -1,67 +1,152 @@
 package com.example.learn.presenter;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import com.example.learn.net.NetPresenter;
+import com.example.learn.ui.Fragment_Login;
 
 import android.graphics.Bitmap;
+import android.os.Handler;
+import android.os.Message;
+import android.sax.StartElementListener;
+import android.util.Log;
 
 public class Fragment_Login_Presenter {
+	// private Fragment_Login fragment_Login;
 	private NetPresenter netPresenter;
-	
-	/**
-	 * 获取验证码图片
-	 */
-	public Bitmap getCheckCodePhoto(){
-		Bitmap bitmap;
-		netPresenter.getCookie();
-		//bitmap可能为null
-		bitmap=netPresenter.getCheckCodePhoto();
-		return bitmap;
+
+	// private Handler fragment_Login_Myhandler;
+
+	public Fragment_Login_Presenter() {
+		// fragment_Login = new Fragment_Login();
+		// fragment_Login_Myhandler = fragment_Login.new MyHandler();
+		netPresenter = NetPresenter.getInstence();
 	}
-	
-	
+
+	/**
+	 * 向Fragment_Login发送消息
+	 */
+
+	private void sendMessageToFragment_Login(int param, Handler handler) {
+		Message message = new Message();
+		message.what = param;
+		handler.sendMessage(message);
+	}
+
+	/**
+	 * 获取验证码图片,并通知Fragment_Login更新验证码
+	 */
+	private Bitmap bitmap;
+
+	public Bitmap getBitmap() {
+		return this.bitmap;
+	}
+
+	public void getCheckCodePhoto(final Handler handler) {
+		new Thread(new Runnable() {
+			public void run() {
+				// bitmap可能为null
+				if (netPresenter.getCookie() == 1) {
+					bitmap = netPresenter.getCheckCodePhoto();
+					sendMessageToFragment_Login(1, handler);
+					// saveMyBitmap("bitmap", bitmap);
+					// sendMessageToFragment_Login(1);
+
+				} else {
+					// 检查网络，稍后重试
+				}
+			}
+		}).start();
+	}
+
 	/**
 	 * 如果返回1，则验证成功，返回0则用户名，密码或者验证码错误
 	 */
-	public int logIn(String id,String password){
-		return netPresenter.logIn(id, password);
+	private int logNub = 0;
+
+	public int logIn(final String id, final String password,
+			final String checkCode, final Handler handler, final int a[]) {
+		new Thread(new Runnable() {
+			public void run() {
+				int logNub = netPresenter.logIn(id, password, checkCode);
+				sendMessageToFragment_Login(13, handler);
+				if (a[0] == 1) {
+					getScore();
+				}
+				if (a[1] == 1) {
+					getMyClass("2014-2015-1");
+				}
+				if (a[2] == 1) {
+					getAllClass();
+				}
+				if (a[3] == 1) {
+					getTest();
+				}
+
+			}
+		}).start();
+
+		return logNub;
 	}
-	
+
 	/**
-	 * if return 1,success;else return 0,fail
+	 * 期末成绩 if return 1,success;else return 0,fail
 	 */
-	public int getScore(){
-		return netPresenter.getScore();
+	private int scoreNub = 0;
+
+	public int getScore() {
+		Log.i("Fragment_Login_Presenter", "getScore");
+		scoreNub = netPresenter.getScore();
+
+		return scoreNub;
 	}
-	
+
 	/**
-	 * if return 1,success;else return 0,fail
+	 * 校园新闻 if return 1,success;else return 0,fail
 	 */
-	public int getNews(){
-		return netPresenter.getNews();
+	private int newsNub = 0;
+
+	public int getNews() {
+		newsNub = netPresenter.getNews();
+
+		return newsNub;
 	}
+
 	/**
-	 * if return 1,success;else return 0,fail
+	 * 课表 if return 1,success;else return 0,fail
 	 */
-	public int getClass(String time){
-		return netPresenter.getClass(time);
+	private int classNub = 0;
+
+	public int getMyClass(String time) {
+		classNub = netPresenter.getClass(time);
+		return classNub;
 	}
-	
+
 	/**
-	 * if return 1,success;else return 0,fail
+	 * 大学全部课程 if return 1,success;else return 0,fail
 	 */
-	public int getAllClass(){
-		return netPresenter.getAllClass();
+	private int allClassNub = 0;
+
+	public int getAllClass() {
+
+		allClassNub = netPresenter.getAllClass();
+
+		return allClassNub;
 	}
+
 	/**
-	 * if return 1,success;else return 0,fail
+	 * 等级考试成绩 if return 1,success;else return 0,fail
 	 */
-	public int getTest(){
-		return netPresenter.getTest();
+	private int testNub = 0;
+
+	public int getTest() {
+		testNub = netPresenter.getTest();
+
+		return testNub;
 	}
-	
-	
-	
-	
-	
-	
+
 }

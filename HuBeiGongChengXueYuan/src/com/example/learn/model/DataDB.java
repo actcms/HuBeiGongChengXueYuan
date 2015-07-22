@@ -2,12 +2,15 @@ package com.example.learn.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.R.dimen;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.example.learn.db.DataOpenHelper;
 
@@ -46,18 +49,20 @@ public class DataDB {
 				contentValues.put("type", myClass.getType());
 				contentValues.put("studyTime", myClass.getStudyTime());
 				contentValues.put("studyScore", myClass.getStudyScore());
+				Log.i("saveMyScore", contentValues.toString());
 				db.insert("Score", null, contentValues);
 			}
 		}
 	}
 
-	public List loadMyScore(String param) {
+	public List loadMyScore() {
 		List list = new ArrayList<MyScore>();
-		Cursor cursor = db.query("Score", null, "time = ?",
-				new String[] { param }, null, null, null);
+		Cursor cursor = db.query("Score", null,null,
+				null, null, null, null);
 		if (cursor.moveToFirst()) {
+			MyScore myScore;
 			do {
-				MyScore myScore = new MyScore();
+				myScore= new MyScore();
 				myScore.setTime(cursor.getString(cursor.getColumnIndex("time")));
 				myScore.setName(cursor.getString(cursor.getColumnIndex("name")));
 				myScore.setScore(cursor.getString(cursor
@@ -67,9 +72,12 @@ public class DataDB {
 						.getColumnIndex("studyTime")));
 				myScore.setStudyScore(cursor.getString(cursor
 						.getColumnIndex("studyScore")));
+				Log.i("DataDB", myScore.getName());
 				list.add(myScore);
+				
 			} while (cursor.moveToNext());
 		}
+		Log.i("DataDB", list.size()+"");
 		return list;
 
 	}
@@ -121,6 +129,7 @@ public class DataDB {
 				contentValues.put("studyScore", allClass.getStudyScore());
 				contentValues.put("term", allClass.getTerm());
 				contentValues.put("testType", allClass.getTestType());
+				Log.i("saveAllClass", contentValues.toString());
 				db.insert("AllClass", null, contentValues);
 			}
 		}
@@ -131,6 +140,7 @@ public class DataDB {
 		Cursor cursor = db
 				.query("AllClass", null, null, null, null, null, null);
 		if (cursor.moveToFirst()) {
+			
 			do {
 				AllClass allClass = new AllClass();
 				allClass.setName(cursor.getString(cursor.getColumnIndex("name")));
@@ -184,9 +194,10 @@ public class DataDB {
 		if (list.size() == 42) {
 			delTable("MyClass");
 			for (Object object : list) {
-				MyClass myClass = (MyClass) object;
-				if (myClass != null) {
-					int nub = ((ArrayList<String>) myClass.getClassName())
+				if (object != null) {
+					MyClass myClass = (MyClass) object;
+
+					int nub = ((ArrayList<String>) myClass.getMatchWeek())
 							.size();
 					for (int i = 0; i < nub; i++) {
 						ArrayList<String> className = (ArrayList<String>) myClass
@@ -197,14 +208,18 @@ public class DataDB {
 								.getClassPlace();
 						ArrayList<String> classWeek = (ArrayList<String>) myClass
 								.getClassWeek();
-						ArrayList<String> classNum = (ArrayList<String>) myClass
-								.getClassNum();
+						ArrayList<String> matchWeek = (ArrayList<String>) myClass
+								.getMatchWeek();
+						String classNum = (String) myClass.getClassNum();
 						ContentValues contentValues = new ContentValues();
 						contentValues.put("className", className.get(i));
 						contentValues.put("teatherName", teacherName.get(i));
 						contentValues.put("classPlace", classPlace.get(i));
 						contentValues.put("classWeek", classWeek.get(i));
-						contentValues.put("classNum", i);
+						contentValues.put("matchWeek", "," + matchWeek.get(i));
+
+						contentValues.put("classNum", classNum);
+						Log.i("saveMyClass", contentValues.toString());
 						db.insert("MyClass", null, contentValues);
 					}
 				}
@@ -212,38 +227,42 @@ public class DataDB {
 		}
 	}
 
-	public MyClass loadMyClass() {
-		MyClass myClass=new MyClass();
+	public List loadMyClass(String param) {
+		Log.i("DataDB", param);
+		WeekClass weekClass=new WeekClass();
 		Cursor cursor = db.query("MyClass", null, null, null, null, null, null);
-		ArrayList<String> classNameList = new ArrayList<String>();
-		ArrayList<String> teatherNameList = new ArrayList<String>();
-		ArrayList<String> classPlaceList = new ArrayList<String>();
-		ArrayList<String> classWeekList = new ArrayList<String>();
-		ArrayList<String> classNumList = new ArrayList<String>();
+		List list = new ArrayList<MyClass>();
 		if (cursor.moveToFirst()) {
 			do {
-				String className = cursor.getColumnName(cursor
-						.getColumnIndex("className"));
-				String teatherName = cursor.getColumnName(cursor
-						.getColumnIndex("teatherName"));
-				String classPlace = cursor.getColumnName(cursor
-						.getColumnIndex("classPlace"));
-				String classWeek = cursor.getColumnName(cursor
-						.getColumnIndex("classWeek"));
-				String classNum = cursor.getColumnName(cursor
-						.getColumnIndex("classNum"));
-				classNameList.add(className);
-				teatherNameList.add(teatherName);
-				classPlaceList.add(classPlace);
-				classWeekList.add(classWeek);
-				classNumList.add(classNum);
+				String matchWeek = cursor.getString(cursor
+						.getColumnIndex("matchWeek"));
+				Pattern pattern = Pattern.compile("(.*?)" + "," + param
+						+ "," + "(.*?)");
+//				Log.i("DataDB", param+"..."+matchWeek);
+				Matcher matcher = pattern.matcher(matchWeek);
+				if (matcher.find()) {
+					Log.i("DataDB", "match");
+					String className = cursor.getString(cursor
+							.getColumnIndex("className"));
+					String teatherName = cursor.getString(cursor
+							.getColumnIndex("teatherName"));
+					String classPlace = cursor.getString(cursor
+							.getColumnIndex("classPlace"));
+					String classWeek = cursor.getString(cursor
+							.getColumnIndex("classWeek"));
+					String classNum = cursor.getString(cursor
+							.getColumnIndex("classNum"));
+					weekClass.setClassName(className);
+					weekClass.setClassNum(classNum);
+					weekClass.setClassPlace(classPlace);
+					weekClass.setClassWeek(classWeek);
+					weekClass.setTeatherName(teatherName);
+					list.add(weekClass);
+					weekClass=new WeekClass();
+				}
 			} while (cursor.moveToNext());
-			myClass.setClassName(classNameList);
-			myClass.setClassNum(classNumList);
-			myClass.setClassPlace(classPlaceList);
-			myClass.setClassWeek(classWeekList);
-			myClass.setTeacherName(teatherNameList);
 		}
-		return myClass;
+		return list;
 	}
+
 }

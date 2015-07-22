@@ -4,10 +4,13 @@ import java.util.Random;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -29,12 +32,20 @@ import com.bluemor.reddotface.view.DragLayout;
 import com.bluemor.reddotface.view.DragLayout.DragListener;
 import com.example.learn.R;
 import com.example.learn.model.MyClass;
+import com.example.learn.ui.Fragment_Login;
 import com.example.learn.ui.Fragment_MyClass;
+import com.example.learn.ui.Fragment_Score;
 import com.nineoldandroids.view.ViewHelper;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 public class MainActivity extends FragmentActivity {
+	
 
+
+	
+
+
+	private MyHandler myHandler;
 	private DragLayout dl;
 //	private GridView gv_img;
 	private ImageAdapter adapter;
@@ -42,20 +53,29 @@ public class MainActivity extends FragmentActivity {
 //	private TextView tv_noimg;
 	private ImageView iv_icon, iv_bottom;
 	private FrameLayout frameLayout;
-	private Fragment frament_myClass;
+	private Fragment fragment_myClass;
+	private Fragment fragment_login;
+	private Fragment_Score fragment_Score;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		Util.initImageLoader(this);
-		initDragLayout();
+		
+		//初始化
 		initView();
-		changeFrameLayout(new Fragment_MyClass());
+		//费时动作
+		initLongTime();
+		
+		initDragLayout();
+//		changeFrameLayout(fragment_login);
+		
+		
 	}
 
 	//侧方菜单
 	private void initDragLayout() {
-		dl = (DragLayout) findViewById(R.id.dl);
+		
 		dl.setDragListener(new DragListener() {
 			@Override
 			public void onOpen() {
@@ -83,10 +103,30 @@ public class MainActivity extends FragmentActivity {
 			ft.commit();
 	}
 	
+	/**
+	 * 费时命令
+	 */
+	private void initLongTime(){
+		new Thread(new Runnable() {
+			public void run() {
+				fragment_myClass=new Fragment_MyClass();
+				sengTheMessage(0);
+				fragment_login=new Fragment_Login();
+				fragment_Score=new Fragment_Score();
+			}
+		}).start();
+	}
+	
 	private void initView() {
+		
+		dl = (DragLayout) findViewById(R.id.dl);
 		frameLayout=(FrameLayout)findViewById(R.id.main_frameLayout);
 		iv_icon = (ImageView) findViewById(R.id.iv_icon);
 		iv_bottom = (ImageView) findViewById(R.id.iv_bottom);
+		myHandler=new MyHandler();
+		
+		
+		
 //		gv_img = (GridView) findViewById(R.id.gv_img);
 //		tv_noimg = (TextView) findViewById(R.id.iv_noimg);
 //		gv_img.setFastScrollEnabled(true);
@@ -111,7 +151,33 @@ public class MainActivity extends FragmentActivity {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1,
 					int position, long arg3) {
-				Util.t(getApplicationContext(), "click " + position);
+//				Util.t(getApplicationContext(), "click " + position);
+				final int aa=position;
+				switch (position) {
+				case 0:
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								Thread.sleep(150);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							fragment_myClass=new Fragment_MyClass();
+							sengTheMessage(aa);
+						}
+					}).start();
+					break;
+				case 1:
+					sengTheMessage(position);
+					break;
+				case 2:
+					sengTheMessage(position);
+					break;
+				default:
+					break;
+				}
+				dl.close();
 			}
 		});
 		iv_icon.setOnClickListener(new OnClickListener() {
@@ -128,38 +194,46 @@ public class MainActivity extends FragmentActivity {
 		//loadImage();
 	}
 
-	private void loadImage() {
-		new Invoker(new Callback() {
-			@Override
-			public boolean onRun() {
-				adapter.addAll(Util.getGalleryPhotos(MainActivity.this));
-				return adapter.isEmpty();
-			}
-
-			@Override
-			public void onBefore() {
-				// 转菊花
-			}
-
-			@Override
-			public void onAfter(boolean b) {
-				adapter.notifyDataSetChanged();
-				if (b) {
-//					tv_noimg.setVisibility(View.VISIBLE);
-				} else {
-//					tv_noimg.setVisibility(View.GONE);
-					String s = "file://" + adapter.getItem(0);
-					ImageLoader.getInstance().displayImage(s, iv_icon);
-					ImageLoader.getInstance().displayImage(s, iv_bottom);
-				}
-				shake();
-			}
-		}).start();
-
+	private void sengTheMessage(int param){
+		Message message=new Message();
+		message.what=param;
+		myHandler.sendMessage(message);
 	}
-
-	private void shake() {
-		iv_icon.startAnimation(AnimationUtils.loadAnimation(this, R.anim.shake));
+	
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+//		Log.i("MainActivity", "dispatchTouchEvent:"+super.dispatchTouchEvent(ev));
+		return super.dispatchTouchEvent(ev);
 	}
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+//		Log.i("MainActivity", "dispatchTouchEvent:"+super.dispatchTouchEvent(ev));
+		// TODO Auto-generated method stub
+		return super.onTouchEvent(event);
+	}
+	
+	
+	class MyHandler extends Handler{
 
+		@Override
+		public void handleMessage(Message msg) {
+			// TODO Auto-generated method stub
+			super.handleMessage(msg);
+			switch (msg.what) {
+			case 0:
+				changeFrameLayout(fragment_myClass);
+				break;
+			case 1:
+				changeFrameLayout(fragment_login);
+				break;
+			case 2:
+				changeFrameLayout(fragment_Score);
+			default:
+				break;
+			}
+		}
+		
+	}
+	
 }

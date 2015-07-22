@@ -7,6 +7,7 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,7 +21,11 @@ import com.nineoldandroids.view.ViewHelper;
 
 public class DragLayout extends FrameLayout {
 
-    private boolean isShowShadow = true;
+    
+
+	
+
+	private boolean isShowShadow = true;
 
     private GestureDetectorCompat gestureDetector;
     private ViewDragHelper dragHelper;
@@ -174,11 +179,20 @@ public class DragLayout extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return dragHelper.shouldInterceptTouchEvent(ev) && gestureDetector.onTouchEvent(ev);
+    	boolean re=dragHelper.shouldInterceptTouchEvent(ev) && gestureDetector.onTouchEvent(ev);
+//    	Log.i("DragLayout", "onInterceptTouchEvent:"+re);
+//    	Log.i("DragLayout", "onInterceptTouchEvent:"+ev.getRawX());
+//    	ev.getRawX()
+    	if(ev.getRawX()>50){
+    		return false;
+    	}else{
+        return re;
+    	}
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
+//    	Log.i("DragLayout", "onTouchEvent:");
         try {
             dragHelper.processTouchEvent(e);
         } catch (Exception ex) {
@@ -186,6 +200,15 @@ public class DragLayout extends FrameLayout {
         }
         return false;
     }
+    
+    @Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+    	
+		return super.dispatchTouchEvent(ev);
+	}
+    
+    
+    
 
     private void dispatchDragEvent(int mainLeft) {
         if (dragListener == null) {

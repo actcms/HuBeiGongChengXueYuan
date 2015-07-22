@@ -1,21 +1,25 @@
 package com.example.learn.net;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.apache.http.NameValuePair;
 import android.util.Log;
 
 public class HttpUtil {
 	// Httpget
-	public void httpGet(final String param, final HttpCallbackListener listener) {
+	public static void httpGet(final String param, final HttpCallbackListener listener) {
 		Log.i("HttpUtil", "url=" + param);
 		try {
 			HttpGet httpGet = new HttpGet(param);
@@ -27,18 +31,25 @@ public class HttpUtil {
 			// httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT,
 			// 20000);
 			HttpResponse httpResponse = httpClient.execute(httpGet);
-
-			InputStream inputStream = httpResponse.getEntity().getContent();
-			InputStreamReader inputRead = new InputStreamReader(inputStream,
-					"utf-8");
-			BufferedReader bufferReader = new BufferedReader(inputRead);
-			String data = "";
-			StringBuffer stringBuffer = new StringBuffer();
-			while ((data = bufferReader.readLine()) != null) {
-				stringBuffer.append(data);
+			if(httpResponse.getStatusLine().getStatusCode()==200){
+				HttpEntity entity = httpResponse.getEntity();
+				
+				String re=EntityUtils.toString(entity,"UTF-8");
+//			
+//			
+//			InputStream inputStream = httpResponse.getEntity().getContent();
+//			InputStreamReader inputRead = new InputStreamReader(inputStream,
+//					"utf-8");
+//			BufferedReader bufferReader = new BufferedReader(inputRead);
+//			String data = "";
+//			StringBuffer stringBuffer = new StringBuffer();
+//			while ((data = bufferReader.readLine()) != null) {
+//				stringBuffer.append(data);
+//			}
+			Log.i("HttpUtil",re);
+			
+			listener.onFinish(re);
 			}
-			Log.i("HttpUtil", stringBuffer.toString());
-			listener.onFinish(httpClient, inputStream, stringBuffer.toString());
 		} catch (Exception e) {
 			Log.i("HttpUtil", e.toString());
 			listener.onError(e);
@@ -47,7 +58,7 @@ public class HttpUtil {
 	}
 
 	// Httpget 带cookie
-	public void httpGet(final String param, final String cookie,
+	public static void httpGet(final String param, final String cookie,
 			final HttpCallbackListener listener) {
 		Log.i("HttpUtil", "url=" + param);
 		try {
@@ -60,19 +71,17 @@ public class HttpUtil {
 			// // 读取超时
 			// httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT,
 			// 20000);
+			Log.i("HttpUtil", "1");
 			HttpResponse httpResponse = httpClient.execute(httpGet);
-
-			InputStream inputStream = httpResponse.getEntity().getContent();
-			InputStreamReader inputRead = new InputStreamReader(inputStream,
-					"utf-8");
-			BufferedReader bufferReader = new BufferedReader(inputRead);
-			String data = "";
-			StringBuffer stringBuffer = new StringBuffer();
-			while ((data = bufferReader.readLine()) != null) {
-				stringBuffer.append(data);
+			Log.i("HttpUtil", "2");
+			if(httpResponse.getStatusLine().getStatusCode()==200){
+			HttpEntity entity = httpResponse.getEntity();
+			Log.i("HttpUtil", "3");
+			String re=EntityUtils.toString(entity,"UTF-8");
+			Log.i("HttpUtil", "4");
+			listener.onFinish(re);
+			Log.i("HttpUtil", "5");
 			}
-			Log.i("HttpUtil", stringBuffer.toString());
-			listener.onFinish(httpClient, inputStream, stringBuffer.toString());
 		} catch (Exception e) {
 			Log.i("HttpUtil", e.toString());
 			listener.onError(e);
@@ -106,7 +115,7 @@ public class HttpUtil {
 				stringBuffer.append(data);
 			}
 			Log.i("HttpUtil", stringBuffer.toString());
-			listener.onFinish(httpClient, inputStream, stringBuffer.toString());
+			listener.onFinish(stringBuffer.toString());
 		} catch (Exception e) {
 			Log.i("HttpUtil", e.toString());
 			listener.onError(e);
@@ -140,7 +149,7 @@ public class HttpUtil {
 					stringBuffer.append(data);
 				}
 				Log.i("HttpUtil", stringBuffer.toString());
-				listener.onFinish(httpClient, inputStream, stringBuffer.toString());
+				listener.onFinish(stringBuffer.toString());
 			} catch (Exception e) {
 				Log.i("HttpUtil", e.toString());
 				listener.onError(e);
