@@ -153,12 +153,12 @@
                     android:text="2014-2015-2" />
             </LinearLayout>
 
-            <CheckBox
+            <!-- <CheckBox
                 android:id="@+id/bxCheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="大学必修课程" />
+                android:text="大学必修课程" /> -->
 
             <CheckBox
                 android:id="@+id/gradeTestCheckBox"

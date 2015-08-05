@@ -13,6 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.example.learn.db.DataOpenHelper;
+import com.example.learn.net.Analysis;
 
 public class DataDB {
 	private static final String DBName = "Date";
@@ -57,12 +58,11 @@ public class DataDB {
 
 	public List loadMyScore() {
 		List list = new ArrayList<MyScore>();
-		Cursor cursor = db.query("Score", null,null,
-				null, null, null, null);
+		Cursor cursor = db.query("Score", null, null, null, null, null, null);
 		if (cursor.moveToFirst()) {
 			MyScore myScore;
 			do {
-				myScore= new MyScore();
+				myScore = new MyScore();
 				myScore.setTime(cursor.getString(cursor.getColumnIndex("time")));
 				myScore.setName(cursor.getString(cursor.getColumnIndex("name")));
 				myScore.setScore(cursor.getString(cursor
@@ -74,10 +74,10 @@ public class DataDB {
 						.getColumnIndex("studyScore")));
 				Log.i("DataDB", myScore.getName());
 				list.add(myScore);
-				
+
 			} while (cursor.moveToNext());
 		}
-		Log.i("DataDB", list.size()+"");
+		Log.i("DataDB", list.size() + "");
 		return list;
 
 	}
@@ -140,7 +140,7 @@ public class DataDB {
 		Cursor cursor = db
 				.query("AllClass", null, null, null, null, null, null);
 		if (cursor.moveToFirst()) {
-			
+
 			do {
 				AllClass allClass = new AllClass();
 				allClass.setName(cursor.getString(cursor.getColumnIndex("name")));
@@ -190,6 +190,31 @@ public class DataDB {
 		return list;
 	}
 
+	public void saveMyClass(String id, String className, String teacher,
+			String classPlace, String classWeek, int param) {
+		if (id.equals("0")) {
+			Analysis analysis = new Analysis();
+			ContentValues contentValues = new ContentValues();
+			contentValues.put("className", className);
+			contentValues.put("teatherName", teacher);
+			contentValues.put("classPlace", classPlace);
+			contentValues.put("classWeek", classWeek);
+			contentValues.put("matchWeek", "," + analysis.matchWeek(classWeek));
+			contentValues.put("classNum", param + "");
+			db.insert("MyClass", null, contentValues);
+		} else {
+			Analysis analysis = new Analysis();
+			ContentValues contentValues = new ContentValues();
+			contentValues.put("className", className);
+			contentValues.put("teatherName", teacher);
+			contentValues.put("classPlace", classPlace);
+			contentValues.put("classWeek", classWeek);
+			contentValues.put("matchWeek", "," + analysis.matchWeek(classWeek));
+			contentValues.put("classNum", param + "");
+			db.update("MyClass", contentValues, "id = ?", new String[] { id });
+		}
+	}
+
 	public void saveMyClass(ArrayList<MyClass> list) {
 		if (list.size() == 42) {
 			delTable("MyClass");
@@ -229,16 +254,16 @@ public class DataDB {
 
 	public List loadMyClass(String param) {
 		Log.i("DataDB", param);
-		WeekClass weekClass=new WeekClass();
+		WeekClass weekClass = new WeekClass();
 		Cursor cursor = db.query("MyClass", null, null, null, null, null, null);
 		List list = new ArrayList<MyClass>();
 		if (cursor.moveToFirst()) {
 			do {
 				String matchWeek = cursor.getString(cursor
 						.getColumnIndex("matchWeek"));
-				Pattern pattern = Pattern.compile("(.*?)" + "," + param
-						+ "," + "(.*?)");
-//				Log.i("DataDB", param+"..."+matchWeek);
+				Pattern pattern = Pattern.compile("(.*?)" + "," + param + ","
+						+ "(.*?)");
+				// Log.i("DataDB", param+"..."+matchWeek);
 				Matcher matcher = pattern.matcher(matchWeek);
 				if (matcher.find()) {
 					Log.i("DataDB", "match");
@@ -252,13 +277,15 @@ public class DataDB {
 							.getColumnIndex("classWeek"));
 					String classNum = cursor.getString(cursor
 							.getColumnIndex("classNum"));
+					String id = cursor.getString(cursor.getColumnIndex("id"));
 					weekClass.setClassName(className);
 					weekClass.setClassNum(classNum);
 					weekClass.setClassPlace(classPlace);
 					weekClass.setClassWeek(classWeek);
 					weekClass.setTeatherName(teatherName);
+					weekClass.setId(id);
 					list.add(weekClass);
-					weekClass=new WeekClass();
+					weekClass = new WeekClass();
 				}
 			} while (cursor.moveToNext());
 		}

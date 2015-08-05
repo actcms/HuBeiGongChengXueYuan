@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,6 +24,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.bluemor.reddotface.activity.ImageActivity;
 import com.bluemor.reddotface.adapter.ImageAdapter;
 import com.bluemor.reddotface.util.Callback;
@@ -34,48 +37,50 @@ import com.example.learn.R;
 import com.example.learn.model.MyClass;
 import com.example.learn.ui.Fragment_Login;
 import com.example.learn.ui.Fragment_MyClass;
+import com.example.learn.ui.Fragment_News;
+import com.example.learn.ui.Fragment_NewsText;
 import com.example.learn.ui.Fragment_Score;
+import com.example.learn.ui.Fragment_Score_Grade;
+import com.example.learn.ui.Fragment_setting;
 import com.nineoldandroids.view.ViewHelper;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 public class MainActivity extends FragmentActivity {
-	
-
-
-	
-
 
 	private MyHandler myHandler;
 	private DragLayout dl;
-//	private GridView gv_img;
+	// private GridView gv_img;
 	private ImageAdapter adapter;
 	private ListView lv;
-//	private TextView tv_noimg;
+	// private TextView tv_noimg;
 	private ImageView iv_icon, iv_bottom;
 	private FrameLayout frameLayout;
 	private Fragment fragment_myClass;
-	private Fragment fragment_login;
-	private Fragment_Score fragment_Score;
+	private Fragment fragment_NewsText;
+	private Fragment nowFragment;
+
+	// private Fragment fragment_login;
+	// private Fragment_Score fragment_Score;
+	// private Fragment_AllClass fragment_AllClass;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		Util.initImageLoader(this);
-		
-		//初始化
+
+		// 初始化
 		initView();
-		//费时动作
+		// 费时动作
 		initLongTime();
-		
+
 		initDragLayout();
-//		changeFrameLayout(fragment_login);
-		
-		
+		// changeFrameLayout(fragment_login);
+
 	}
 
-	//侧方菜单
+	// 侧方菜单
 	private void initDragLayout() {
-		
+
 		dl.setDragListener(new DragListener() {
 			@Override
 			public void onOpen() {
@@ -84,7 +89,7 @@ public class MainActivity extends FragmentActivity {
 
 			@Override
 			public void onClose() {
-				//shake();
+				// shake();
 			}
 
 			@Override
@@ -94,65 +99,93 @@ public class MainActivity extends FragmentActivity {
 		});
 	}
 
-	private void changeFrameLayout(Fragment targetFragment){
-			Log.i("MainActivity", "changeFrameLayout");
-			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-//			ft.add(R.id.main_fragment, targetFragment, "fragment");
-			ft.replace(R.id.main_frameLayout, targetFragment, "fragment");
-			ft.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-			ft.commit();
+	private void changeFrameLayout(Fragment targetFragment) {
+		if (nowFragment != null) {
+			if (nowFragment == fragment_NewsText) {
+				removeFrameLayout(nowFragment);
+				nowFragment=null;
+			}
+		}
+		Log.i("MainActivity", "changeFrameLayout");
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+		// ft.add(R.id.main_fragment, targetFragment, "fragment");
+		ft.replace(R.id.main_frameLayout, targetFragment, "fragment");
+		ft.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+		ft.commit();
 	}
-	
+
+	private void addFrameLayout(Fragment targetFragment) {
+		Log.i("MainActivity", "changeFrameLayout");
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+		ft.add(R.id.main_frameLayout, targetFragment, "fragment");
+		// ft.replace(R.id.main_frameLayout, targetFragment, "fragment");
+		ft.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+		ft.commit();
+		nowFragment = targetFragment;
+	}
+
+	private void removeFrameLayout(Fragment targetFragment) {
+		Log.i("MainActivity", "changeFrameLayout");
+		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+		ft.remove(targetFragment);
+		// ft.replace(R.id.main_frameLayout, targetFragment, "fragment");
+		ft.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+		ft.commit();
+	}
+
 	/**
 	 * 费时命令
 	 */
-	private void initLongTime(){
+	private void initLongTime() {
 		new Thread(new Runnable() {
 			public void run() {
-				fragment_myClass=new Fragment_MyClass();
+				fragment_myClass = new Fragment_MyClass();
 				sengTheMessage(0);
-				fragment_login=new Fragment_Login();
-				fragment_Score=new Fragment_Score();
+				// fragment_login=new Fragment_Login();
+				// fragment_Score=new Fragment_Score();
+				// fragment_AllClass=new Fragment_AllClass();
 			}
 		}).start();
 	}
-	
+
 	private void initView() {
-		
+
 		dl = (DragLayout) findViewById(R.id.dl);
-		frameLayout=(FrameLayout)findViewById(R.id.main_frameLayout);
+		frameLayout = (FrameLayout) findViewById(R.id.main_frameLayout);
 		iv_icon = (ImageView) findViewById(R.id.iv_icon);
 		iv_bottom = (ImageView) findViewById(R.id.iv_bottom);
-		myHandler=new MyHandler();
 		
+//		iv_icon.setBackgroundResource(R.drawable.my_launcher);
+//		iv_bottom.setBackgroundResource(R.drawable.my_launcher);
 		
-		
-//		gv_img = (GridView) findViewById(R.id.gv_img);
-//		tv_noimg = (TextView) findViewById(R.id.iv_noimg);
-//		gv_img.setFastScrollEnabled(true);
+		myHandler = new MyHandler();
+
+		// gv_img = (GridView) findViewById(R.id.gv_img);
+		// tv_noimg = (TextView) findViewById(R.id.iv_noimg);
+		// gv_img.setFastScrollEnabled(true);
 		adapter = new ImageAdapter(this);
-//		gv_img.setAdapter(adapter);
-//		gv_img.setOnItemClickListener(new OnItemClickListener() {
-//			@Override
-//			public void onItemClick(AdapterView<?> parent, View view,
-//					int position, long id) {
-//				Intent intent = new Intent(MainActivity.this,
-//						ImageActivity.class);
-//				intent.putExtra("path", adapter.getItem(position));
-//				startActivity(intent);
-//			}
-//		});
-		//侧方listview
+		// gv_img.setAdapter(adapter);
+		// gv_img.setOnItemClickListener(new OnItemClickListener() {
+		// @Override
+		// public void onItemClick(AdapterView<?> parent, View view,
+		// int position, long id) {
+		// Intent intent = new Intent(MainActivity.this,
+		// ImageActivity.class);
+		// intent.putExtra("path", adapter.getItem(position));
+		// startActivity(intent);
+		// }
+		// });
+		// 侧方listview
 		lv = (ListView) findViewById(R.id.lv);
 		lv.setAdapter(new ArrayAdapter<String>(MainActivity.this,
-				R.layout.item_text, new String[] { "课表", "登录",
-						"成绩", "必修课程", "等级考试" }));
+				R.layout.item_text, new String[] { "课表", "登录", "成绩", "新闻","设置" }));
 		lv.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1,
 					int position, long arg3) {
-//				Util.t(getApplicationContext(), "click " + position);
-				final int aa=position;
+				Log.i("MainActivity", "onItemClick" + position);
+				// Util.t(getApplicationContext(), "click " + position);
+				final int aa = position;
 				switch (position) {
 				case 0:
 					new Thread(new Runnable() {
@@ -163,7 +196,7 @@ public class MainActivity extends FragmentActivity {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							fragment_myClass=new Fragment_MyClass();
+							fragment_myClass = new Fragment_MyClass();
 							sengTheMessage(aa);
 						}
 					}).start();
@@ -174,7 +207,14 @@ public class MainActivity extends FragmentActivity {
 				case 2:
 					sengTheMessage(position);
 					break;
+				case 3:
+					sengTheMessage(position);
+					break;
+				case 4:
+					sengTheMessage(6);
+					break;
 				default:
+					sengTheMessage(1);
 					break;
 				}
 				dl.close();
@@ -191,30 +231,31 @@ public class MainActivity extends FragmentActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		//loadImage();
+		// loadImage();
 	}
 
-	private void sengTheMessage(int param){
-		Message message=new Message();
-		message.what=param;
+	private void sengTheMessage(int param) {
+		Message message = new Message();
+		message.what = param;
 		myHandler.sendMessage(message);
 	}
-	
+
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
-//		Log.i("MainActivity", "dispatchTouchEvent:"+super.dispatchTouchEvent(ev));
+		// Log.i("MainActivity",
+		// "dispatchTouchEvent:"+super.dispatchTouchEvent(ev));
 		return super.dispatchTouchEvent(ev);
 	}
-	
+
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-//		Log.i("MainActivity", "dispatchTouchEvent:"+super.dispatchTouchEvent(ev));
+		// Log.i("MainActivity",
+		// "dispatchTouchEvent:"+super.dispatchTouchEvent(ev));
 		// TODO Auto-generated method stub
 		return super.onTouchEvent(event);
 	}
-	
-	
-	class MyHandler extends Handler{
+
+	class MyHandler extends Handler {
 
 		@Override
 		public void handleMessage(Message msg) {
@@ -225,15 +266,67 @@ public class MainActivity extends FragmentActivity {
 				changeFrameLayout(fragment_myClass);
 				break;
 			case 1:
-				changeFrameLayout(fragment_login);
+				Fragment fragment1 = new Fragment_Login(myHandler);
+				changeFrameLayout(fragment1);
 				break;
 			case 2:
-				changeFrameLayout(fragment_Score);
+				Fragment fragment2 = new Fragment_Score();
+				changeFrameLayout(fragment2);
+				break;
+			case 3:
+				Fragment fragment3 = new Fragment_News(myHandler);
+				changeFrameLayout(fragment3);
+				break;
+			case 4:
+				int param = msg.getData().getInt("param");
+				fragment_NewsText = new Fragment_NewsText(param);
+				addFrameLayout(fragment_NewsText);
+				break;
+			case 5:
+				initLongTime();
+				break;
+			case 6:
+				Fragment fragment4 = new Fragment_setting();
+				changeFrameLayout(fragment4);
+				break;
 			default:
 				break;
 			}
 		}
-		
+
 	}
-	
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		// TODO Auto-generated method stub
+
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			if (nowFragment != null) {
+				if (nowFragment == fragment_NewsText) {
+					removeFrameLayout(nowFragment);
+					nowFragment=null;
+				} else {
+					exit();
+				}
+			}else{
+				exit();
+			}
+		}
+
+		return false;
+	}
+
+	private long exitTime = System.currentTimeMillis();
+
+	public void exit() {
+		if ((System.currentTimeMillis() - exitTime) > 1000) {
+			Toast.makeText(getApplicationContext(), "再按一次退出程序",
+					Toast.LENGTH_SHORT).show();
+			exitTime = System.currentTimeMillis();
+		} else {
+			finish();
+			System.exit(0);
+		}
+	}
+
 }

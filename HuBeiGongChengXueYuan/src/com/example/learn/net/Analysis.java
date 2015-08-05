@@ -117,15 +117,19 @@ public class Analysis {
 			list1.add(link.attr("href"));
 			list2.add(link.attr("title"));
 		}
-		dataDB.saveNews(list1, list2);
+		dataDB.saveNews(list2, list1);
 
 	}
 
 	// 解析新闻内容
-	public void analysisNewText(String source) {
+	public String analysisNewText(String source) {
 		org.jsoup.nodes.Document doc = Jsoup.parse(source);
 		Elements links_class = doc.select("div[class=text]");
+		links_class.toString();
+//		links_class=links_class.select("p[style=text-align:left]");
 		String text = links_class.text();
+		Log.i("Analysis", text);
+		return text;
 	}
 
 	// 解析大学全部课程
@@ -135,7 +139,7 @@ public class Analysis {
 
 		List list = new ArrayList<AllClass>();
 
-		org.jsoup.nodes.Document doc = Jsoup.parse(source);
+		org.jsoup.nodes.Document doc = Jsoup.parse(test);
 
 		Elements table = doc.select("table[border=1]");
 		Elements links_class = table.select("td[height=23]");
@@ -362,6 +366,65 @@ public class Analysis {
 			}
 		}
 		return myList;
+	}
+	
+	public String matchWeek(String param){
+		String re="";
+		String myTime = param;
+		if ("".equals(myTime) == false) {
+			Log.i("Analysis", myTime);
+			// 匹配单周
+			int danzhou = 0;
+			int shuangzhou = 0;
+			Pattern dan = Pattern.compile("(.*?)单周");
+			Matcher Mdan = dan.matcher(myTime);
+			while (Mdan.find()) {
+				myTime = myTime.replaceAll("单", "");
+				danzhou = 1;
+			}
+			// 匹配双周
+			Pattern shuang = Pattern.compile("(.*?)双周");
+			Matcher Mshuang = shuang.matcher(myTime);
+			while (Mshuang.find()) {
+				myTime = myTime.replaceAll("双", "");
+				shuangzhou = 1;
+			}
+			// System.out.println("MyTime---"+MyTime);
+
+			// 解析周数，此时没有 单 双 字,开始解析周数
+			Pattern pattern1 = Pattern.compile("(.*?)周");
+			Matcher matcher1 = pattern1.matcher(myTime);
+			String add = "";
+			while (matcher1.find()) {
+				String Time = matcher1.group(1);
+				// 形如1，2，3，4周 1-2，4-5，7周
+				Pattern pattern5 = Pattern.compile("(.*?)\\,");
+				Matcher matcher5 = pattern5.matcher(Time);
+				if (matcher5.find()) {
+					Log.i("Analysis", "," + Time);
+
+					// 形如1，2，3，4周
+					Pattern pattern2 = Pattern.compile("\\,");
+					Matcher matcher2 = pattern5.matcher(Time + ",");
+					while (matcher2.find()) {
+						String a = match2(matcher2.group(1), danzhou,
+								shuangzhou);
+						if ("".equals(a) == false) {
+							add = add + a + ",";
+						}
+					}
+					re=add;
+					// 没有，形如 1 1-2
+				} else {
+					String ar = match2(Time, danzhou, shuangzhou);
+					Log.i("Analysis", ar);
+					re=ar;
+				}
+
+			}
+
+		}
+		return re;
 	}
 
 	/**

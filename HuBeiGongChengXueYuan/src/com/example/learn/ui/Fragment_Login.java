@@ -42,7 +42,7 @@ public class Fragment_Login extends Fragment {
 	public Button refresh;
 	public CheckBox scoreCheckBox;
 	public CheckBox timetableCheckBox;
-	public CheckBox bxCheckBox;
+	// public CheckBox bxCheckBox;
 	public CheckBox gradeTestCheckBox;
 	public TextView classtime;
 	private UserDB userDB;
@@ -50,6 +50,11 @@ public class Fragment_Login extends Fragment {
 	private Fragment_Login_Presenter fragment_Login_Presenter;
 	private MyHandler myHandler;
 	private Button schoolTime;
+	private Handler acitvityHandler;
+
+	public Fragment_Login(Handler handler) {
+		acitvityHandler = handler;
+	}
 
 	@SuppressLint("InflateParams")
 	public View onCreateView(LayoutInflater inflater,
@@ -57,16 +62,18 @@ public class Fragment_Login extends Fragment {
 		view = inflater.inflate(R.layout.fragment_login, null, false);
 
 		initialize();
-
+		// 进入刷新验证码
+		// fragment_Login_Presenter.getCheckCodePhoto(myHandler);
 		return view;
 	}
 
 	private void initialize() {
-		fragment_Login_Presenter = new Fragment_Login_Presenter();
+		
 
-		context = getActivity().getApplicationContext();
+		context = getActivity();
 
 		schoolTime = (Button) view.findViewById(R.id.schoolTime);
+		
 		studentID = (EditText) view.findViewById(R.id.studentID);
 		password = (EditText) view.findViewById(R.id.password);
 		checkCode = (EditText) view.findViewById(R.id.checkCode);
@@ -77,7 +84,7 @@ public class Fragment_Login extends Fragment {
 		scoreCheckBox = (CheckBox) view.findViewById(R.id.scoreCheckBox);
 		timetableCheckBox = (CheckBox) view
 				.findViewById(R.id.timetableCheckBox);
-		bxCheckBox = (CheckBox) view.findViewById(R.id.bxCheckBox);
+		// bxCheckBox = (CheckBox) view.findViewById(R.id.bxCheckBox);
 		gradeTestCheckBox = (CheckBox) view
 				.findViewById(R.id.gradeTestCheckBox);
 
@@ -87,10 +94,10 @@ public class Fragment_Login extends Fragment {
 		refresh.setOnClickListener(new RefreshListener());
 		schoolTime.setOnClickListener(new SchoolListener());
 		myHandler = new MyHandler();
-
+		fragment_Login_Presenter = new Fragment_Login_Presenter(context,myHandler);
 		fillEdit();
 		// 暂时不用
-		// fragment_Login_Presenter.getCheckCodePhoto(myHandler);
+		fragment_Login_Presenter.getCheckCodePhoto(myHandler);
 	}
 
 	private void fillEdit() {
@@ -108,7 +115,6 @@ public class Fragment_Login extends Fragment {
 				}
 			}
 		}).start();
-
 	}
 
 	public void setStudentNub(String studentID, String password) {
@@ -123,7 +129,6 @@ public class Fragment_Login extends Fragment {
 			Log.i("Fragment_Login", "bitmap==null");
 		}
 		this.checkCodePhoto.setImageBitmap(bitmap);
-
 	}
 
 	private void saveIDPassword() {
@@ -141,17 +146,6 @@ public class Fragment_Login extends Fragment {
 	class EnterListener implements OnClickListener {
 
 		public void onClick(View v) {
-			new Thread(new Runnable() {
-				public void run() {
-					Analysis analysis = new Analysis();
-					// analysis.analyseAllClass("");
-					// analysis.analysisMyClass("");
-					// analysis.analysisScore("");
-					// analysis.analysisGradeTest("");
-				}
-			}).start();
-
-			saveIDPassword();
 			Log.i("Fragment_Login", "EnterListener");
 			if (TextUtils.isEmpty(studentID.getText())) {
 				// 学号为空
@@ -164,31 +158,27 @@ public class Fragment_Login extends Fragment {
 				// 验证码为空
 				sendMessage(12);
 			} else {
-				int a[] = { 0, 0, 0, 0 };
+				int a[] = { 0, 0, 0 };
 				if (scoreCheckBox.isChecked()) {
 					a[0] = 1;
 				}
 				if (timetableCheckBox.isChecked()) {
 					a[1] = 1;
 				}
-				if (bxCheckBox.isChecked()) {
+				// if (bxCheckBox.isChecked()) {
+				// a[2] = 1;
+				// }
+				if (gradeTestCheckBox.isChecked()) {
 					a[2] = 1;
 				}
-				if (gradeTestCheckBox.isChecked()) {
-					a[3] = 1;
-				}
-				if (fragment_Login_Presenter.logIn(//
+				fragment_Login_Presenter.logIn(//
 						studentID.getText().toString(),//
 						password.getText().toString(),//
 						checkCode.getText().toString(),//
+						schoolTime.getText().toString(),
 						myHandler,//
-						a) == 1) {
-					// 登录成功
-					sendMessage(13);
-					saveIDPassword();
-
-				}
-				;
+						a);
+				
 			}
 		}
 
@@ -204,9 +194,8 @@ public class Fragment_Login extends Fragment {
 
 	class SchoolListener implements OnClickListener {
 		public void onClick(View v) {
-
+			fragment_Login_Presenter.schoolTimeListener(schoolTime);
 		}
-
 	}
 
 	class MyHandler extends Handler {
@@ -222,27 +211,55 @@ public class Fragment_Login extends Fragment {
 				setCheckCodePhoto();
 				break;
 			case 2:
-				Log.i("Fragment_Login", "MyHandler"+"2"+msg.getData().getString("id")+msg.getData().getString("password"));
+				Log.i("Fragment_Login", "MyHandler" + "2"
+						+ msg.getData().getString("id")
+						+ msg.getData().getString("password"));
 				studentID.setText(msg.getData().getString("id"));
 				password.setText(msg.getData().getString("password"));
-
 				break;
-
+			case 9:
+				// 输入框为空
+				Toast.makeText(context, "网络或输入内容错误", Toast.LENGTH_SHORT).show();
+				fragment_Login_Presenter.getCheckCodePhoto(myHandler);
+				break;
 			case 10:
 				// 输入框为空
 				Toast.makeText(context, "学号为空", Toast.LENGTH_SHORT).show();
+				fragment_Login_Presenter.getCheckCodePhoto(myHandler);
 				break;
 			case 11:
 				// 输入框为空
 				Toast.makeText(context, "密码为空", Toast.LENGTH_SHORT).show();
+				fragment_Login_Presenter.getCheckCodePhoto(myHandler);
 				break;
 			case 12:
 				// 输入框为空
 				Toast.makeText(context, "验证码为空", Toast.LENGTH_SHORT).show();
+				fragment_Login_Presenter.getCheckCodePhoto(myHandler);
 				break;
 			case 13:
 				// 登录成功
 				Toast.makeText(context, "登录成功", Toast.LENGTH_SHORT).show();
+				saveIDPassword();
+				break;
+			case 14:
+				// 获取数据
+				Toast.makeText(context, "正在获取数据，稍等片刻", Toast.LENGTH_SHORT)
+						.show();
+				break;
+			case 15:
+				// 获取数据
+				Toast.makeText(context, "获取考试成绩成功", Toast.LENGTH_SHORT).show();
+				break;
+			case 16:
+				// 获取数据
+				Toast.makeText(context, "获取课表成功", Toast.LENGTH_SHORT).show();
+				break;
+			case 17:
+				// 获取数据
+				Message message = new Message();
+				message.what = 5;
+				acitvityHandler.sendMessage(message);
 				break;
 			default:
 				break;

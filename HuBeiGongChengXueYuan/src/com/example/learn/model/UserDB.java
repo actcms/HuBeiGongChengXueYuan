@@ -97,5 +97,23 @@ public class UserDB {
 		return list;
 
 	}
+	
+	public void saveNowWeek(String week,String nowTime){
+		del("NowWeek");
+		ContentValues contentValues=new ContentValues();
+		contentValues.put("week", week);
+		contentValues.put("nowTime", nowTime);
+		db.insert("NowWeek", null, contentValues);
+	}
+	
+	public String[] loadNowWeek(){
+		String nowWeek[]={"0","0"};
+		Cursor cursor=db.query("NowWeek", null, null, null, null, null, null);
+		if(cursor.moveToFirst()){
+			nowWeek[0]=cursor.getString((cursor.getColumnIndex("week")));
+			nowWeek[1]=cursor.getString((cursor.getColumnIndex("nowTime")));
+		}
+		return nowWeek;
+	}
 
 }

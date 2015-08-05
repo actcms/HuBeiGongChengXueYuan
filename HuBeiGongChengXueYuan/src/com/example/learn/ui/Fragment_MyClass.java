@@ -1,8 +1,15 @@
 ﻿package com.example.learn.ui;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,14 +24,14 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import com.example.learn.R;
+import com.example.learn.model.DataDB;
+import com.example.learn.model.UserDB;
 import com.example.learn.presenter.Fragment_Login_Presenter;
 import com.example.learn.presenter.Fragment_MyClass_Presenter;
+import com.example.learn.tool.MyDialog;
+import com.example.learn.tool.MyTime;
 
-public class Fragment_MyClass extends Fragment {
-	
-
-	
-
+public class Fragment_MyClass extends Fragment implements View.OnClickListener {
 	private Button ty1;
 	private Button ty2;
 	private Button ty3;
@@ -67,12 +74,15 @@ public class Fragment_MyClass extends Fragment {
 	private Button ty40;
 	private Button ty41;
 	private Button ty42;
+	private Button time;
 	// private ImageButton Back;
 	// private Button Time;
 	private ArrayList<Button> button = new ArrayList<Button>();
 	private View view;
 	private Fragment_MyClass_Presenter fragment_MyClass_Presenter;
 	private MyHandler myHandler;
+	private UserDB userDB;
+	private Context context;
 
 	@SuppressLint("InflateParams")
 	@Override
@@ -85,19 +95,30 @@ public class Fragment_MyClass extends Fragment {
 		Log.v("1", "aaa");
 		// 填充button List
 		FillButtonList();
-		//填充数据
-		fragment_MyClass_Presenter.setClassButtonText(myHandler,button, 1 + "");
+
+		// 为button添加tag
+		setButtonTag();
+		// 填充数据
+		setMyClass();
 		return view;
 	}
 
 	private void setRES() {
+		context = getActivity();
 		// Back = (ImageButton) view.findViewById(R.id.myclassBack);
 		// Back.setOnClickListener(new BackListener());
 		// Time = (Button) view.findViewById(R.id.myclassTime);
 		// Time.setOnClickListener(new TimeListener());
-		fragment_MyClass_Presenter = new Fragment_MyClass_Presenter();
-		myHandler=new MyHandler();
-		
+
+		userDB = UserDB.getInstance(context);
+		myHandler = new MyHandler();
+
+		fragment_MyClass_Presenter = new Fragment_MyClass_Presenter(myHandler,
+				getActivity());
+
+		time = (Button) view.findViewById(R.id.time);
+		time.setOnClickListener(new TimeListener());
+
 		ty1 = (Button) view.findViewById(R.id.textView1);
 		ty2 = (Button) view.findViewById(R.id.textView2);
 		ty3 = (Button) view.findViewById(R.id.textView3);
@@ -143,39 +164,49 @@ public class Fragment_MyClass extends Fragment {
 
 	}
 
-	
+	private void setMyClass() {
+		String week[] = userDB.loadNowWeek();
+		Calendar calendar = Calendar.getInstance();
+		if (!week[0].equals("0")) {
+			long now = MyTime.getTimesWeekmorning();
+			long last = Long.valueOf(week[1]);
+
+			String lastWeek = week[0];
+			Pattern p = Pattern.compile("(\\d+)");
+			Matcher m = p.matcher(lastWeek);
+			String find = "0";
+			while (m.find()) {
+				find = m.group(1).toString();
+			}
+
+			Date date = new Date(last);
+			Calendar c = Calendar.getInstance();
+			c.setTime(date);
+			// 上次星期几
+			int lastweek = c.get(Calendar.DAY_OF_WEEK) + 1;
+
+			// 上次课表周数
+			int myWeek = Integer.valueOf(find);
+
+			// 上次到今天的天数
+			int day = (int) ((now - last) / (1000 * 60 * 60 * 24));
+
+			int passWeek = (day + lastweek) / 7;
+
+			int param = myWeek + passWeek;
+			Log.i("Fragment_MyClass", passWeek + "," + myWeek);
+			fragment_MyClass_Presenter.setClassButtonText(button, "" + param);
+			time.setText("第" + param + "周");
+		} else {
+			fragment_MyClass_Presenter.setClassButtonText(button, "" + 1);
+			time.setText("第" + 1 + "周");
+		}
+	}
 
 	class TimeListener implements OnClickListener {
 		@Override
 		public void onClick(View v) {
-			// CharSequence[] a = { "第1周", "第2周", "第3周", "第4周", "第5周", "第6周",
-			// "第7周", "第8周", "第9周", "第10周", "第11周", "第12周", "第13周",
-			// "第14周", "第15周", "第16周", "第17周", "第18周", "第19周", "第20周",
-			// "第21周", "第22周", "第23周", "第24周", "第25周" };
-			// new AlertDialog.Builder(Myclass.this)
-			// .setTitle("设置周数")
-			// .setItems(a, new DialogInterface.OnClickListener() {
-			// @Override
-			// public void onClick(DialogInterface dialog, int which) {
-			// setWeek(which);
-			// }
-			// })
-			// .setNegativeButton("取消",
-			// new DialogInterface.OnClickListener() {
-			//
-			// @Override
-			// public void onClick(DialogInterface dialog,
-			// int which) {
-			// // TODO Auto-generated method stub
-			// }
-			// }).show();
-		}
-	}
-
-	class AddListener implements OnClickListener {
-		@Override
-		public void onClick(View v) {
-
+			fragment_MyClass_Presenter.timeButoonListener(time);
 		}
 	}
 
@@ -224,51 +255,8 @@ public class Fragment_MyClass extends Fragment {
 		button.add(ty41);
 		button.add(ty42);
 	}
-	
-	@Override
-	public void onResume() {
-		fragment_MyClass_Presenter.setClassButtonText(myHandler,button, 1 + "");
-		super.onResume();
-		Log.i("Fragment_MyClass", "onResume");
-		
-	}
-	
-	@Override
-	public void onDestroy() {
-		Log.i("Fragment_MyClass", "onDestroy");
-		// TODO Auto-generated method stub
-		super.onDestroy();
-	}
 
-	@Override
-	public void onDetach() {
-		Log.i("Fragment_MyClass", "onDetach");
-		// TODO Auto-generated method stub
-		super.onDetach();
-	}
-
-	@Override
-	public void onPause() {
-		Log.i("Fragment_MyClass", "onPause");
-		// TODO Auto-generated method stub
-		super.onPause();
-	}
-
-	@Override
-	public void onStart() {
-		Log.i("Fragment_MyClass", "onStart");
-		// TODO Auto-generated method stub
-		super.onStart();
-	}
-
-	@Override
-	public void onStop() {
-		Log.i("Fragment_MyClass", "onStop");
-		// TODO Auto-generated method stub
-		super.onStop();
-	}
-	
-	class MyHandler extends Handler{
+	class MyHandler extends Handler {
 
 		@Override
 		public void handleMessage(Message msg) {
@@ -276,16 +264,41 @@ public class Fragment_MyClass extends Fragment {
 			super.handleMessage(msg);
 			switch (msg.what) {
 			case 1:
-				String text=msg.getData().getString("text");
-				String nub=msg.getData().getString("nub");
+				String text = msg.getData().getString("text");
+				String nub = msg.getData().getString("nub");
 				button.get(Integer.valueOf(nub)).setText(text);
 				break;
 
+			case 2:
+				Bundle bundle = msg.getData();
+				String nuber = bundle.getString("nub");
+				fragment_MyClass_Presenter.setClassButtonText(button, nuber);
+				break;
+			case 3:
+				for (int i = 0; i < button.size(); i++) {
+					((Button) button.get(i)).setText("");
+				}
+				break;
 			default:
 				break;
 			}
 		}
-		
+
+	}
+
+	private void setButtonTag() {
+		for (int i = 0; i < button.size(); i++) {
+			Button b = (Button) button.get(i);
+			b.setTag(i);
+			b.setOnClickListener(this);
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		Integer tag = (Integer) v.getTag();
+		Log.i("Fragment_MyClass", tag + "");
+		fragment_MyClass_Presenter.touchButton(tag + 1);
 	}
 
 }

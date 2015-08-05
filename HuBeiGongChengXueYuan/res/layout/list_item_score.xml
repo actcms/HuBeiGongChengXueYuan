@@ -14,9 +14,7 @@
             android:id="@+id/list_textView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="30dp"
-            android:layout_marginTop="30dp"
-            android:layout_marginBottom="30dp"
+            android:layout_margin="30dp"
             android:text="TextxtView" />
     </RelativeLayout>
 

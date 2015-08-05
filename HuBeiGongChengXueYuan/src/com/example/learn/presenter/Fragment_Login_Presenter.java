@@ -9,21 +9,30 @@ import java.io.InputStream;
 import com.example.learn.net.NetPresenter;
 import com.example.learn.ui.Fragment_Login;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.sax.StartElementListener;
 import android.util.Log;
+import android.widget.Button;
 
 public class Fragment_Login_Presenter {
 	// private Fragment_Login fragment_Login;
 	private NetPresenter netPresenter;
+	private Context context;
+	private Handler handler;
 
 	// private Handler fragment_Login_Myhandler;
 
-	public Fragment_Login_Presenter() {
+	public Fragment_Login_Presenter(Context context,Handler handler) {
 		// fragment_Login = new Fragment_Login();
 		// fragment_Login_Myhandler = fragment_Login.new MyHandler();
+		this.context=context;
+		this.handler=handler;
 		netPresenter = NetPresenter.getInstence();
 	}
 
@@ -50,15 +59,15 @@ public class Fragment_Login_Presenter {
 		new Thread(new Runnable() {
 			public void run() {
 				// bitmap可能为null
-				if (netPresenter.getCookie() == 1) {
-					bitmap = netPresenter.getCheckCodePhoto();
-					sendMessageToFragment_Login(1, handler);
-					// saveMyBitmap("bitmap", bitmap);
-					// sendMessageToFragment_Login(1);
+				// if (netPresenter.getCookie() == 1) {
+				bitmap = netPresenter.getCheckCodePhoto();
+				sendMessageToFragment_Login(1, handler);
+				// saveMyBitmap("bitmap", bitmap);
+				// sendMessageToFragment_Login(1);
 
-				} else {
-					// 检查网络，稍后重试
-				}
+				// } else {
+				// 检查网络，稍后重试
+				// }
 			}
 		}).start();
 	}
@@ -69,24 +78,38 @@ public class Fragment_Login_Presenter {
 	private int logNub = 0;
 
 	public int logIn(final String id, final String password,
-			final String checkCode, final Handler handler, final int a[]) {
+			final String checkCode, final String classTime,final Handler handler, final int a[]) {
 		new Thread(new Runnable() {
 			public void run() {
-				int logNub = netPresenter.logIn(id, password, checkCode);
-				sendMessageToFragment_Login(13, handler);
-				if (a[0] == 1) {
-					getScore();
-				}
-				if (a[1] == 1) {
-					getMyClass("2014-2015-1");
-				}
-				if (a[2] == 1) {
-					getAllClass();
-				}
-				if (a[3] == 1) {
-					getTest();
-				}
+				logNub = netPresenter.logIn(id, password, checkCode);
+				Log.i("Fragment_Login_Presenter", "logIn"+logNub);
+				if (logNub == 1) {
+					// 准备页面
+					netPresenter.getPrepare();
+					sendMessageToFragment_Login(13, handler);
+					sendMessageToFragment_Login(14, handler);
+					if (a[0] == 1) {
+						if (getScore() == 1) {
+							sendMessageToFragment_Login(15, handler);
+						}
+					}
+					if (a[1] == 1) {
+						if (getMyClass(classTime) == 1) {
+							sendMessageToFragment_Login(16, handler);
+						}
+					}
+					// if (a[2] == 1) {
+					// getAllClass();
+					// }
+					if (a[2] == 1) {
+						getTest();
+						// sendMessageToFragment_Login(17, handler);}
+					}
 
+					 sendMessageToFragment_Login(17, handler);
+				}else{
+					sendMessageToFragment_Login(9, handler);
+				}
 			}
 		}).start();
 
@@ -147,6 +170,26 @@ public class Fragment_Login_Presenter {
 		testNub = netPresenter.getTest();
 
 		return testNub;
+	}
+	
+	public void schoolTimeListener(final Button button){
+		final CharSequence[] a = { "2010-2011-1", "2010-2011-2", "2011-2012-1", "2011-2012-2", "2012-2013-1",
+				"2012-2013-2", "2013-2014-1","2013-2014-2","2014-2015-1","2014-2015-2",
+				"2015-2016-1","2015-2016-2","2016-2017-1","2016-2017-2",
+				"2017-2018-1" ,"2017-2018-2","2018-2019-1","2018-2019-2"};
+		new AlertDialog.Builder(context).setTitle("设置课表")
+				.setItems(a, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						button.setText(a[which]+"");
+					}
+				})
+				.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+
+					public void onClick(DialogInterface dialog, int which) {
+
+					}
+				}).show();
 	}
 
 }

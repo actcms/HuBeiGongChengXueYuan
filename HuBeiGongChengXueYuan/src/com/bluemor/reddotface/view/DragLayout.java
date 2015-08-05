@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.example.learn.R;
+import com.example.learn.tool.MyApplication;
 import com.nineoldandroids.view.ViewHelper;
 
 public class DragLayout extends FrameLayout {
@@ -183,7 +184,9 @@ public class DragLayout extends FrameLayout {
 //    	Log.i("DragLayout", "onInterceptTouchEvent:"+re);
 //    	Log.i("DragLayout", "onInterceptTouchEvent:"+ev.getRawX());
 //    	ev.getRawX()
-    	if(ev.getRawX()>50){
+    	int a[]=MyApplication.getScreenWidthHeight();
+//    	Log.i("DragLayout",a[0]+"=="+a[1]);
+    	if(ev.getRawX()>a[0]/8){
     		return false;
     	}else{
         return re;

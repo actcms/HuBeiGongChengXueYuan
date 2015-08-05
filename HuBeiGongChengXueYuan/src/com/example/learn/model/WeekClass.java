@@ -3,6 +3,12 @@ package com.example.learn.model;
 import java.util.ArrayList;
 
 public class WeekClass {
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
 	public String getClassName() {
 		return className;
 	}
@@ -46,4 +52,5 @@ public class WeekClass {
 	private String classWeek;
 	private String classNum;
 	private String matchWeek;
+	private String id;
 }
