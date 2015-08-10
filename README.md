@@ -17,7 +17,7 @@
     jsoup-1.7.2.jar
 
 
-2.你可能从项目中学到
-    复杂的html解析存储
-    activity,fragment交互
-    简单的android网络编程
+2.你可能从项目中学到<br>
+    复杂的html解析存储<br>
+    activity,fragment交互<br>
+    简单的android网络编程等<br>
