@@ -11,7 +11,7 @@
 
 
 用到的开源框架：
-  1.[DragLayout](https://github.com/BlueMor/DragLayout)
+  ['DragLayout'](https://github.com/BlueMor/DragLayout)\<br>
   ![](https://github.com/BlueMor/DragLayout/raw/master/screenshots/123.gif)
   
-  2.jsoup-1.7.2.jar
+  'jsoup-1.7.2.jar'
