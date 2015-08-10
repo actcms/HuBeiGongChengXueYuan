@@ -9,3 +9,9 @@
 ![](https://github.com/guohuanwen/HuBeiGongChengXueYuan/blob/master/HuBeiGongChengXueYuan/screenshot/Screenshot_2015-08-03-20-00-51.png)
 ![](https://github.com/guohuanwen/HuBeiGongChengXueYuan/blob/master/HuBeiGongChengXueYuan/screenshot/Screenshot_2015-08-03-20-01-02.png)
 
+
+用到的开源框架：
+  1.[DragLayout](https://github.com/BlueMor/DragLayout)
+  ![](https://github.com/BlueMor/DragLayout/raw/master/screenshots/123.gif)
+  
+  2.jsoup-1.7.2.jar
