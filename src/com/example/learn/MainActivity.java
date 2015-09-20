@@ -25,9 +25,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.bluemor.reddotface.activity.ImageActivity;
-import com.bluemor.reddotface.adapter.ImageAdapter;
 import com.bluemor.reddotface.util.Callback;
 import com.bluemor.reddotface.util.Invoker;
 import com.bluemor.reddotface.util.Util;
@@ -42,6 +39,7 @@ import com.example.learn.ui.Fragment_NewsText;
 import com.example.learn.ui.Fragment_Score;
 import com.example.learn.ui.Fragment_Score_Grade;
 import com.example.learn.ui.Fragment_setting;
+import com.gitonway.lee.niftymodaldialogeffects.lib.effects.NewsPaper;
 import com.nineoldandroids.view.ViewHelper;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -49,8 +47,6 @@ public class MainActivity extends FragmentActivity {
 
 	private MyHandler myHandler;
 	private DragLayout dl;
-	// private GridView gv_img;
-	private ImageAdapter adapter;
 	private ListView lv;
 	// private TextView tv_noimg;
 	private ImageView iv_icon, iv_bottom;
@@ -181,21 +177,7 @@ public class MainActivity extends FragmentActivity {
 		
 		myHandler = new MyHandler();
 
-		// gv_img = (GridView) findViewById(R.id.gv_img);
-		// tv_noimg = (TextView) findViewById(R.id.iv_noimg);
-		// gv_img.setFastScrollEnabled(true);
-		adapter = new ImageAdapter(this);
-		// gv_img.setAdapter(adapter);
-		// gv_img.setOnItemClickListener(new OnItemClickListener() {
-		// @Override
-		// public void onItemClick(AdapterView<?> parent, View view,
-		// int position, long id) {
-		// Intent intent = new Intent(MainActivity.this,
-		// ImageActivity.class);
-		// intent.putExtra("path", adapter.getItem(position));
-		// startActivity(intent);
-		// }
-		// });
+		
 		// 侧方listview
 		lv = (ListView) findViewById(R.id.lv);
 		lv.setAdapter(new ArrayAdapter<String>(MainActivity.this,
@@ -328,8 +310,8 @@ public class MainActivity extends FragmentActivity {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			if (nowFragment != null) {
 				if (nowFragment == fragment_NewsText) {
-					removeFrameLayout(nowFragment);
-					nowFragment=null;
+					hideReplaceFrameLayout(fragment_News);
+					nowFragment=fragment_News;
 				} else {
 					exit();
 				}

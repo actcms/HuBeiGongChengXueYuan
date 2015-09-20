@@ -70,7 +70,7 @@ public class Fragment_setting extends Fragment{
 	class AboutListener implements OnClickListener{
 		public void onClick(View v) {
 			TextView textView=new TextView(getActivity());
-			textView.setText("软件版本：4.1 \n\n"+"软件说明：本软件是个人开发，时间有限，网络和界面优化方面有所不足，后期会慢慢改善，有什么建议或者意见请发邮件至1179636441@qq.com");
+			textView.setText("软件版本：4.2 \n\n"+"软件说明：本软件是个人开发，时间有限，网络和界面优化方面有所不足，后期会慢慢改善，有什么建议或者意见请发邮件至1179636441@qq.com");
 			final MyDialog myDialog = new MyDialog();
 			myDialog.dialogShow(4, getActivity(), textView, new OnClickListener() {
 				@Override
