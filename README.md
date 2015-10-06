@@ -1,5 +1,5 @@
 # HuBeiGongChengXueYuan
-<<<<<<< HEAD
+
 ##学校教务管理系统Android软件  school's app
 ##下载
 [百度链接](http://shouji.baidu.com/soft/item?docid=7872467&from=&f=search_app_湖北工程学院%40list_1_title%401%40header_software_input)
@@ -16,8 +16,8 @@
 <br>
 
 ##用到的开源框架：<br>
-    [`DragLayout`](https://github.com/BlueMor/DragLayout)<br>
-  ![](https://github.com/BlueMor/DragLayout/raw/master/screenshots/123.gif)<br>
+[DragLayout](https://github.com/BlueMor/DragLayout)  
+![](https://github.com/BlueMor/DragLayout/raw/master/screenshots/123.gif)
   
     jsoup-1.7.2.jar
 <br>
